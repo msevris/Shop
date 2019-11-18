@@ -241,7 +241,7 @@ namespace Shop.Database.Migrations
 
                     b.Property<int>("ProductId");
 
-                    b.Property<int>("Quantity");
+                    b.Property<int>("Qty");
 
                     b.HasKey("Id");
 
