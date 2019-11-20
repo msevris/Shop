@@ -6,18 +6,22 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Shop.Application.Cart;
+using Shop.Application.Orders;
+using Shop.Database;
 using Stripe;
 
 namespace Shop.UI.Pages.Checkout
 {
     public class PaymentModel : PageModel
     {
-        public PaymentModel(IConfiguration config )
+        public string PublicKey { get; }
+        private readonly ApplicationDbContext _ctx;
+
+        public PaymentModel(IConfiguration config, ApplicationDbContext ctx)
         {
             PublicKey = config["Stripe:PublicKey"].ToString();
+            _ctx = ctx;
         }
-
-        public string PublicKey { get; }
 
         public IActionResult OnGet()
         {
@@ -30,42 +34,46 @@ namespace Shop.UI.Pages.Checkout
             return Page();
         }
 
-        public IActionResult OnPost(string stripeEmail)
+        public async Task<IActionResult> OnPost(string stripeEmail, string stripeToken)
         {
-            // Set your secret key: remember to change this to your live secret key in production
-            // See your keys here: https://dashboard.stripe.com/account/apikeys
-            StripeConfiguration.ApiKey = "sk_test_epfhwDGKqA2eerOjsogN1lf900Yqj21wNr";
+            var customers = new CustomerService();
+            var CartOrder = new Application.Cart.GetOrder(HttpContext.Session, _ctx).Do();
 
-            // Create a Customer:
-            var customerOptions = new CustomerCreateOptions
+            var charges = new ChargeService();
+
+            var customer = customers.Create(new CustomerCreateOptions
             {
                 Email = stripeEmail,
-            };
-            var customerService = new CustomerService();
-            Customer customer = customerService.Create(customerOptions);
-
-            // Charge the Customer instead of the card:
-            var chargeOptions = new ChargeCreateOptions
+                Source = stripeToken
+            });
+            var charge = charges.Create(new ChargeCreateOptions
             {
-                Amount = 1000,
-                Currency = "usd",
-                Customer = customer.Id,
-            };
-            var chargeService = new ChargeService();
-            Charge charge = chargeService.Create(chargeOptions);
+                Amount = CartOrder.GetTotalChange(),
+                Description = "Shop Purchace",
+                Currency = "eur",
+                Customer = customer.Id
+            });
 
-            // YOUR CODE: Save the customer ID and other info in a database for later.
-
-            // When it's time to charge the customer again, retrieve the customer ID.
-            var options = new ChargeCreateOptions
+            await new CreateOrder(_ctx).Do(new CreateOrder.Request
             {
-                Amount = 1500, // $15.00 this time
-                Currency = "usd",
-                Customer = customer.Id, // Previously stored, then retrieved
-            };
-            
+                StripeReference = charge.Id,
 
+                FirstName = CartOrder.CustomerInformation.FirstName,
+                LastName = CartOrder.CustomerInformation.LastName,
+                Email = CartOrder.CustomerInformation.Email,
+                PhoneNumber = CartOrder.CustomerInformation.PhoneNumber,
+                Address1 = CartOrder.CustomerInformation.Address1,
+                Address2 = CartOrder.CustomerInformation.Address2,
+                City = CartOrder.CustomerInformation.City,
+                PostCode = CartOrder.CustomerInformation.PostCode,
 
+                Stocks = CartOrder.Products.Select(x => new CreateOrder.Stock
+                {
+                    StockId = x.StockId,
+                    Qty = x.Qty,
+
+                }).ToList()
+            });
             return RedirectToPage("/Index");
         }
     }
