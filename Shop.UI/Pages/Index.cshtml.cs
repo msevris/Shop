@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Shop.Application.ProductsAdmin;
+using Shop.Application.Products;
 using Shop.Database;
 
 namespace Shop.UI.Pages
