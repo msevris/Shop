@@ -13,7 +13,8 @@
     </environment>
 </head>
 <body>
-    <h2 class=" title has-text-centered">Admin Panel</h2>
+    <br />
+    <h2 class="subtitle has-text-centered">Admin Panel</h2>
 
     <div class="container">
         <div class="columns">
@@ -27,11 +28,12 @@
                     </ul>
                     <p class="menu-label"></p>
                     <ul class="menu-list">
-                        <li><a asp-page="/Index">Back to Main</a></li>
+                        <li><a asp-page="/Index">&larr; to Main</a></li>
                     </ul>
                 </div>
             </div>
             <div class="column is-9">
+                <br/>
                 @RenderBody()
             </div>
         </div>

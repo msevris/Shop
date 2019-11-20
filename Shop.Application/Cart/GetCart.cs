@@ -26,8 +26,9 @@ namespace Shop.Application.Cart
         {
             public string Name { get; set; }
             public string Value { get; set; }
-            public int StockId { get; set; }
             public int Qty { get; set; }
+            public int StockId { get; set; }
+           
         }
         public IEnumerable<Response> Do()
         {

@@ -15,7 +15,7 @@
     methods: {
         getStock() {
             this.loading = true;
-            axios.get('/Admin/stocks/')
+            axios.get('/Admin/stocks')
                 .then(res => {
                     console.log(res);
                     this.products = res.data;
