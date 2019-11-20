@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shop.Database;
+using Stripe;
+using System;
 
 namespace Shop.UI
 {
@@ -32,7 +34,12 @@ namespace Shop.UI
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(_config["DefaultConnection"], b => b.MigrationsAssembly("Shop.Database")));
            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddSession();
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = "Cart";
+                options.Cookie.MaxAge = TimeSpan.FromDays(365);
+            });
+            StripeConfiguration.ApiKey = _config.GetSection("Stripe")["SecretKey"];
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
