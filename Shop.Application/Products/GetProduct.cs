@@ -16,24 +16,43 @@ namespace Shop.Application.Products
         {
             _ctx = ctx;
         }
-        public ProductViewModel Do(string name) =>
-            _ctx.Products
+
+        public async Task<ProductViewModel> Do(string name)
+        {
+            var stocksOnHold = _ctx.StocksOnHold.Where(x => x.ExpiryDate < DateTime.Now).ToList();
+
+            if (stocksOnHold.Count > 0)
+            {
+                var stockToReturn = _ctx.Stock.Where(x => stocksOnHold.Any(y => y.StockId == x.Id)).ToList();
+
+                foreach (var stock in stockToReturn)
+                {
+                    stock.Qty = stock.Qty + stocksOnHold.FirstOrDefault(x => x.StockId == stock.Id).Qty;
+                }
+
+                _ctx.StocksOnHold.RemoveRange(stocksOnHold);
+                await _ctx.SaveChangesAsync();
+            }
+
+            return _ctx.Products
             .Include(x => x.Stock)
             .Where(x => x.Name == name)
             .Select(x => new ProductViewModel
-                {
-                    Name = x.Name,
-                    Description = x.Description,
-                    Value = $"\u20AC {x.Value.ToString("N2")}",
+            {
+                Name = x.Name,
+                Description = x.Description,
+                Value = $"\u20AC {x.Value.ToString("N2")}",
 
-                    Stock = x.Stock.Select(y => new StockViewModel
-                    {
-                        Id = y.Id,
-                        Description = y.Description,
-                        InStock = y.Qty > 0
-                    })
+                Stock = x.Stock.Select(y => new StockViewModel
+                {
+                    Id = y.Id,
+                    Description = y.Description,
+                    InStock = y.Qty > 0
                 })
+            })
             .FirstOrDefault();
+        }
+
         public class ProductViewModel
         {
             public string Name { get; set; }

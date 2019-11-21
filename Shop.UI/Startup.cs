@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,13 +34,28 @@ namespace Shop.UI
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(_config["DefaultConnection"], b => b.MigrationsAssembly("Shop.Database")));
            
+            services.AddDefaultIdentity<IdentityUser>(options =>
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequiredLength = 6;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                })
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin",policy => policy.RequireClaim("Admin"));
+                options.AddPolicy("Manager", policy => policy.RequireClaim("Manager"));
+            });
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddSession(options =>
             {
                 options.Cookie.Name = "Cart";
-                options.Cookie.MaxAge = TimeSpan.FromDays(365);
+                options.Cookie.MaxAge = TimeSpan.FromMinutes(20);
             });
-            StripeConfiguration.ApiKey = _config.GetSection("Stripe")["SecretKey"];
+            StripeConfiguration.ApiKey = _config.GetSection("Stripe")["sk_test_epfhwDGKqA2eerOjsogN1lf900Yqj21wNr"];
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,6 +76,8 @@ namespace Shop.UI
             app.UseCookiePolicy();
 
             app.UseSession();
+
+            app.UseAuthentication();
             app.UseMvc();
         }
     }

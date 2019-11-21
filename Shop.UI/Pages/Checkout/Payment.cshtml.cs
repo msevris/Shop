@@ -36,16 +36,16 @@ namespace Shop.UI.Pages.Checkout
 
         public async Task<IActionResult> OnPost(string stripeEmail, string stripeToken)
         {
-            var customers = new CustomerService();
             var CartOrder = new Application.Cart.GetOrder(HttpContext.Session, _ctx).Do();
 
-            var charges = new ChargeService();
-
+            var customers = new CustomerService();
             var customer = customers.Create(new CustomerCreateOptions
             {
                 Email = stripeEmail,
-                Source = stripeToken
+
             });
+
+            var charges = new ChargeService();
             var charge = charges.Create(new ChargeCreateOptions
             {
                 Amount = CartOrder.GetTotalChange(),
@@ -54,9 +54,12 @@ namespace Shop.UI.Pages.Checkout
                 Customer = customer.Id
             });
 
+            var sessionId = HttpContext.Session.Id;
+
             await new CreateOrder(_ctx).Do(new CreateOrder.Request
             {
                 StripeReference = charge.Id,
+                SessionId = sessionId,
 
                 FirstName = CartOrder.CustomerInformation.FirstName,
                 LastName = CartOrder.CustomerInformation.LastName,
