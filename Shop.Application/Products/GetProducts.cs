@@ -18,7 +18,7 @@ namespace Shop.Application.Products
           {
               Name = x.Name,
               Description = x.Description,
-              Value = x.Value,
+              Value = x.Value
           });
         public class ProductViewModel
         {

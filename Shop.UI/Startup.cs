@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shop.Application.UsersAdmin;
 using Shop.Database;
 using Stripe;
 using System;
@@ -34,7 +35,7 @@ namespace Shop.UI
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(_config["DefaultConnection"], b => b.MigrationsAssembly("Shop.Database")));
            
-            services.AddDefaultIdentity<IdentityUser>(options =>
+            services.AddIdentity<IdentityUser,IdentityRole>(options =>
                 {
                     options.Password.RequireDigit = false;
                     options.Password.RequiredLength = 6;
@@ -43,19 +44,36 @@ namespace Shop.UI
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddAuthorization(options =>
+            services.ConfigureApplicationCookie(options => 
             {
-                options.AddPolicy("Admin",policy => policy.RequireClaim("Admin"));
-                options.AddPolicy("Manager", policy => policy.RequireClaim("Manager"));
+                options.LoginPath = "/Accounts/Login";
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin",policy => policy.RequireClaim("Role","Admin"));
+                //options.AddPolicy("Manager", policy => policy.RequireClaim("Role","Manager"));
+                options.AddPolicy("Manager", policy => policy
+                    .RequireAssertion( context => 
+                        context.User.HasClaim("Role", "Manager") 
+                        || context.User.HasClaim("Role", "Admin")));
+            });
+
+            services.AddMvc()
+                .AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AuthorizeFolder("/Admin");
+                    options.Conventions.AuthorizePage("/Admin/ConfigureUsers","Admin");
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddSession(options =>
             {
                 options.Cookie.Name = "Cart";
                 options.Cookie.MaxAge = TimeSpan.FromMinutes(20);
             });
             StripeConfiguration.ApiKey = _config.GetSection("Stripe")["sk_test_epfhwDGKqA2eerOjsogN1lf900Yqj21wNr"];
+
+            services.AddTransient<CreateUser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,7 +96,7 @@ namespace Shop.UI
             app.UseSession();
 
             app.UseAuthentication();
-            app.UseMvc();
+            app.UseMvcWithDefaultRoute();
         }
     }
 }

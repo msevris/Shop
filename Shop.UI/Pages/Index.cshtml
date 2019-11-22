@@ -5,15 +5,38 @@
 }
 
 <div>
-    @{
-        foreach (var p in Model.Products)
-        {
-            <a asp-page="Product" asp-route-name="@p.Name.Replace(" ","-")">
-                <p>
-                    @p.Name - @p.Description  - @p.Value
-                </p>
-            </a>
+    <div class="columns is-multiline">
+        @{
+            for (int i = 0; i < 5; i++)
+            {
+                foreach (var p in Model.Products)
+                {
+                    <div class="column is-3-desktop is-4-tablet is-6-mobile">
+                        <a asp-route-name="@p.Name.Replace(" ","-")">
+                            <div class="card" asp-page="Product">
+                                <div class="card-image">
+                                    <figure class="image is-4by3">
+                                        <img src="~/images/item.JPG" alt="Placeholder image"/>
+                                    </figure>
+                                </div>
+                                <div class="card-content">
+                                    <p class="title is-size-5">
+                                        @p.Name   @p.Value
+                                    </p>
+                                    <div class="subtitle">
+                                        @p.Description
+                                    </div>
+                                </div>
+                                <div class="content">
+
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
+            }
+
         }
-    }
+    </div>
 </div>
 @await Component.InvokeAsync("Cart")
