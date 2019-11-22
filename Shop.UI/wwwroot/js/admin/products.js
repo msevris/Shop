@@ -1,18 +1,17 @@
 
 var app = new Vue({
-    
     el: '#app',
     data: {
-            editing: false,
-            loading: false,
-            objectIndex: 0,
-            productModel: {
-                id: 0,
-                name: "Product Name",
-                description: "Product Description",
-                value: 1.99
-            },
-            products: []
+        editing: false,
+        loading: false,
+        objectIndex: 0,
+        productModel: {
+            id: 0,
+            name: "Product Name",
+            description: "Product Description",
+            value: 1.99
+        },
+        products: []
 
     },
     mounted() {
@@ -113,5 +112,5 @@ var app = new Vue({
     },
     computed: {
     }
-    
+
 });

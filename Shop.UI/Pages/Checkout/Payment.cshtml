@@ -2,29 +2,36 @@
 @model Shop.UI.Pages.Checkout.PaymentModel
 @{
 }
-<h2>Payment</h2>
-<div>
-    <form method="post" id="payment-form">
-        <div class="form-row">
-            <label for="card-element">
-                Create or debit card
-            </label>
-            <div id="card-element">
-                <!-- a stripe element will be inserted here -->
+
+<div class="columns">
+    <div class="column is-6">
+        <p class="title">Payment</p>
+        <form method="post" id="payment-form">
+            <div class="field">
+                <div class="form-row">
+                    <div id="card-element">
+                        <!-- a stripe element will be inserted here -->
+                    </div>
+
+                    <!-- used to display form errors-->
+                    <div id="card-errors" role="alert"></div>
+                </div>
             </div>
+            <div class="field  has-text-right">
+                <button class="button is-success">Pay</button>
+            </div>
+        </form>
+    </div>
 
-            <!-- used to display form errors-->
-            <div id="card-errors" role="alert"></div>
-        </div>
-
-        <button>Submit Payment</button>
-    </form>
+    <div class="column is-6">
+        <vc:cart view="Default"></vc:cart>
+    </div>
 </div>
 
 @section scripts
 {
-<script src="https://js.stripe.com/v3/"></script>
-<script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
     /* create a Stripe Client */
     var stripe = Stripe('@Model.PublicKey');
 
