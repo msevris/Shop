@@ -23,7 +23,7 @@
                     this.loading = false;
                 });
         },
-        selectedOrder(id) {
+        selectOrder(id) {
             this.loading = true;
             axios.get('/orders/' + id)
                 .then(result => {
@@ -31,6 +31,19 @@
                     this.loading = false;
                 });
         },
-
+        updateOrder() {
+            this.loading = true;
+            axios.put('/orders/' + this.selectedOrder.id, null)
+                .then(result => {
+                    this.loading = false;
+                    this.exitOrder();
+                    this.getOrders();
+                });
+        },
+        exitOrder() {
+            this.selectedOrder = null;
+        }
+    },
+    computed: {
     }
-})
+});

@@ -73,7 +73,7 @@ namespace Shop.UI
             });
             StripeConfiguration.ApiKey = _config.GetSection("Stripe")["sk_test_epfhwDGKqA2eerOjsogN1lf900Yqj21wNr"];
 
-            services.AddTransient<CreateUser>();
+           services.AddApplicationServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
