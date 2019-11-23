@@ -7,16 +7,18 @@
     <div>
         <br />
                 <div v-if="!editing">
-                    <button class="button" @@click="newProduct">Add New Product</button>
+                    <a class="button" @@click="newProduct">Add New Product</a>
                     <br />
-                    <table class="table">
-                        <tr>
-                            <th>Id</th>
-                            <th>Product</th>
-                            <th>Value</th>
-                            <th></th>
-                            <th></th>
-                        </tr>
+                    <table class="table is-hoverable">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Product</th>
+                                <th>Value</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
                         <tr v-for="(product,index) in products">
                             <td>{{product.id}}</td>
                             <td>{{product.name}}</td>
